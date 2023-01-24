@@ -63,7 +63,19 @@ Binary trees are a special type of tree in which all nodes except for the leaf n
 \label{fig:binary_tree}
 \end{figure}
 
-\section{Open AI Gym}
+\section{Architecture search}
+Neural networks have seen significant improvements in recent years, particularly with the abundance of data available. Deep neural networks are now able to solve a wide range of problems such as image recognition and translations. However, finding the optimal number of layers and nodes (referred to as the architecture) for a neural network to solve a problem efficiently remains a challenging task. One approach is to try different architectures and evaluate their performance. This can be difficult when dealing with deep neural networks with high complexity. Another approach is to use neural architecture search, which automates the process of finding an appropriate architecture for a specific task. Research is ongoing to find effective methods for architecture search. Currently, evolutionary algorithms, reinforcement learning, and gradient-based optimization, or a combination of these techniques, are commonly used to search the space of possible architectures (\cite{elsken_neural_nodate}). 
+
+\section{Scientific experiments}
+ basic scientific experiment involves several steps that ultimately lead to a conclusion based on the observations made. The first step is to observe a phenomenon and formulate a hypothesis about how or why it works. Next, an experiment is designed and executed to validate or disprove the hypothesis. A crucial step is to then analyze and interpret the data obtained from the experiment, and finally, to draw a conclusion. It is important to note that in computer science, the process can be more complex because the experimentation often involves creating something that did not exist previously. However, the same scientific methods must still be applied to study and understand the newly created system.
+
+\section{OpenAI Gym}
+
+Open Ai Gym is a toolkit that provides a variety of environments for developing and comparing reinforcement learning algorithms. One of its main advantages is that is uses the same interface for every task which enables an easy comparison and reproduction of results. It offers a range of environments for training agents, including classical control problems, Atari games, and physics simulations which vary in difficulty. OpenAI Gym offers tools for evaluating and visualizing the performance of the algorithms such as pre-built plotters and metrics. All of this gives big advantages for the research community in the field of reinforcement learning (\cite{noauthor_openai_2016}). 
+
+To start working with the toolkit, the first step is to generate an instance of a specified envrionment. This can be done with the predefined function $gym.make()$ to which we pass the name of the environment we want to generate as parameter. The environment can then be stored as a variable and can be reset to its initial state with the $reset()$ function which is typically done at the beginning of an episode and gives out the observations of the current state and some extra information. The observation is often used to get an action from a model which is then passed as argument to the predefined function $step()$. This function returns the next state, the reward obtained, a boolean indicating wheter the episode is over and some extra information too. These are just some basic functions that enable to start developing and evaluating reinforcement learning algorithms with the help of OpenAI Gym.
+
+
 
 
 
