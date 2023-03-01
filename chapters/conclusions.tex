@@ -4,7 +4,11 @@
 \label{ch:conclusions}
 
 \section{Conclusion}
-In this work we...
+In this work, we improved the binary tree model as an alternative for neural networks in solving reinforcement learning problems by adding a function that enables trees to grow dynamically depending on the complexity of the task to solve. The first goal of the project was to make the model work, which was a success. The newly implemented function that should enable the model to increase the size of the tree by randomly selecting the place to add new nodes was also implemented successfully.
+
+The new model showed that it could solve the $Lunar Lander$ environment with discrete actions rapidly. However, for the $Bipedal Walker$ environment, which has a continuous action space, it had more difficulties than expected. The task often got stuck with relatively low scores. It is, however, a comprehensive approach due to the simplicity of the \texttt{add\_node} function, which is only a first step toward architecture search for binary trees. 
 
 \section{Future Work}
-The continuation of this work includes...
+The continuation of this work includes fitness shaping as a first step to see if the "Bipedal Walker" task can be solved with the current implementation of the binary tree. It would also be interesting to investigate the performance or the model on other environments to evaluate the robustness of the model in solving reinforcement learning problems and could provide  valuable insights into its capabilities and limitations. Furthermore, a crucial aspect would be to explore other methods for architecture search using binary trees. The scope of this project is limited as it can only grow the tree by randomly selecting the place to insert new nodes, the addition of new nodes is done when a linear threshold is reached based on the size of the tree, the functions of the nodes are set equally for all nodes of the tree (only distinguishing between leaf and non-leaf nodes), etc. All these aspects could be modified and tested to improve architecture search for binary trees. Also comparing the performance of the binary tree model to that of traditional neural networks on various tasks could provide a better understanding of the potential advantages and disadvantages of using binary trees as an alternative.
+
+Finally, binary trees remain one possibility for an alternative to neural networks. It would be interesting to research other models that address the current limitations of neural networks.
