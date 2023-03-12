@@ -6,10 +6,14 @@
 This chapter presents the core contribution of the project, focusing on the binary tree model with a particular emphasis on two key functions. The efficiency of the model was tested on two OpenAI Gym environments, which will be discussed. Additionally, some basic reinforcement learning components and their adaptations for this project will be presented. The code for this chapter is written in Python and can be found on Github\footnote{$https://github.com/DavidGauc/btree\_model/$}.
 
 \section{Model}
-The use of binary trees in this project offers a unique perspective in model architecture and decision-making, as well as potentially improved performance and interpretability compared to traditional neural network models. Additionally, the binary tree model does not require back-propagation or continuous functions, making it a highly efficient and effective solution. The black-box optimization techniques used further enhance the efficiency and effectiveness of the model.
+Models are tools used to represent a range of functions, and the number of functions a model can represent depends on the specific model used. However, every model can only approximate a finite number of functions.
+
+This project employs binary trees as a unique method to approximate control policies using the reinforcement learning approach. Compared to traditional neural network models, binary trees offer potential benefits, including improved performance and interpretability. Additionally, binary trees do not require back-propagation or continuous functions, which makes them a more efficient and effective solution.
+
+The binary tree model is being used to solve continuous control problems in this project. It takes in information about the current state of the environment and outputs the appropriate action for the agent to take. The goal is to use the binary tree to approximate the best action for the agent to take given the current state, making the model an effective tool to approximate control policies.
 
 \subsection{\texttt{Node} module}
-A node in a binary tree is composed of a pointer that points to its parent node, a function from a defined function class, and an assigned weight that adjusts the importance of the decision or computation made at that node. Additionally, the node has two pointers, one to its left child and one to its right child, that are used to traverse the tree and make decisions based on the input data and the functions applied at each node. Figure~\ref{fig:node_composition} illustrates a binary tree with a single node.
+A node in a binary tree is composed of a pointer that points to its parent node, a function from a defined function class, and an assigned weight that adjusts the importance of the decision or computation made at that node. Additionally, the node has two pointers - one to its left child and one to its right child - that are used to traverse the tree and make decisions based on the input data and the functions applied at each node. The basic functioning of this module was already implemented at the beginning of the project. An important addition that needs to be made is to have a pointer to the parent, which was not necessary before having a method to dynamically increase the tree size. Each node in the tree needs to know its parent node in order to transmit the updated number of weights and nodes once new nodes are added to the tree, as you will see in \ref{model_functioning}. Figure~\ref{fig:node_composition} illustrates a binary tree with a single node to show the different elements that compose a node in this model and the pointers that are assigned to it.
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=.2\textwidth]{node}
@@ -32,9 +36,14 @@ The constant function returns the weights as output regardless of the input valu
 
 Each instance of the function class contains the number of inputs and outputs, the weights used by the function, and the number of times the function has been activated. The weights can be learned or fixed, and the input and output values can take a specific range.
 
-For nodes that are not leaf nodes in the tree, it is convenient to use linear functions, as their output will be a scalar value useful for the traversal of the tree. The details of how the functions, weights, and pointers are used to make decisions and perform computations in the tree can be found in the activate function in \ref{binary_tree}.
+The module also includes a way to set the required amount of weights needed for each function and return the unused weights. Additionally, it increases a counter each time a function is activated in the tree. This allows us to see which nodes and functions were activated the most during the process, which is important for analysis, especially when determining which tree structure is most convenient for solving different problems.
+
+An important add-on that was implemented in this project is the ability to copy a function. This feature will be used in the node insertion strategy presented later.
+
+For non-leaf nodes in the tree, it is convenient to use linear functions because their output will be a scalar value that is useful for traversing the tree. The details of how the functions, weights, and pointers are used to make decisions and perform computations in the tree can be found in the activate function in \ref{binary_tree}.
 
 \subsection{\texttt{BTree} module}
+
 \label{binary_tree}
 This module implements the binary tree model. A binary tree is composed of interconnected nodes, each of which holds a function. The illustration in Figure~\ref{fig:tree_composition} shows a binary tree with a root node and two child nodes.
 \begin{figure}[!ht]
@@ -48,7 +57,12 @@ Representation of a tree with a root node that contains a linear function and tw
 \end{figure}
 A binary tree is a structure made up of linked nodes that contain functions that are used to make decisions or perform computations based on input data. Each node in the tree has a function, which can be one of the types implemented in the project: constant function, linear function, or perceptron. It also has two child nodes that can be either leaf nodes or internal nodes.
 
-The process of using the tree to make decisions or perform computations is referred to as activation. The $activate$ function represented as pseudo code in the Algorithm~\ref{algo:pseudo_activate_function} starts at the root of the tree and navigates through the links between nodes based on the output of the current node's function. When it reaches a leaf node, it returns the output of that node's function as the final output of the tree.
+The module enables the retrieval of basic information about the binary tree, such as its current structure, the number of weights or nodes it has, and the activations that occurred during an experiment. The main contribution of this project is enabling the tree to grow dynamically with a specific node insertion strategy, which will be presented in \ref{model_functioning}.
+
+\subsection{model functioning}
+\label{model_functioning}
+
+The process of using the tree to make decisions or perform computations is referred to as activation. This procedure enables the use of a classical data structure like the binary tree for solving reinforcement learning problems. The model uses the reinforcement learning paradigm by getting observations as inputs and outputting actions for the agent to take through the activation of the binary tree. The resulting activation of the model is a good policy approximator which makes use of the advantages discussed in the introduction. An important role is taken by the function that determines how to traverse the tree in such a way that the observations result in convenient actions for the agent to take by getting information about the current state of the environment. The function implemented for this model is represented as pseudocode in Algorithm~\ref{algo:pseudo_activate_function}. The \texttt{activate\_function} starts at the root of the tree and navigates through the links between nodes based on the output of the current node's function. The functions that are not leaf nodes use a linear function in the case of this project. This means the function takes the observations as inputs and gives out a scalar. If the value of the scalar is positive, the left child node is chosen, else the right child node is chosen. By repeating this, the function will eventually get to the bottom of the tree. When reaching a leaf node, the function will return the output obtained by passing the observations as input to the function implemented in that particular node. In the case of this project, leaf nodes will either use a constant function or perceptrons. The outputs will need to be interpreted differently depending on whether the action space is discrete or continuous, as you will see in \ref{env_model_interface}. But basically, this will tell the agent which actions it should perform.
 
 The construction of the tree involves determining the decision points in the tree, which are selected based on the input data and the problem to be solved. The tree can be trained and updated by adjusting its functions, weights, and links between nodes.
 
@@ -75,7 +89,17 @@ Compared to other models like neural networks and decision trees, binary trees h
 
 The difficulty of tasks can vary, making it necessary to have the ability to adjust the size of the tree accordingly. For instance, simpler problems like the Cartpole in OpenAI Gym can be solved with a smaller tree, while more complex problems demand a larger tree. Increasing the size of the tree enables more complex decision-making and can enhance the model's performance. However, it also increases the risk of overfitting.
 
-In this project, a function has been implemented to dynamically increase the size of the tree as the complexity of the problem increases. This process of finding an optimal structure is referred to as architecture search. The implemented function demonstrates only one of many possible techniques for growing the tree structure. This technique is a simple approach and will add only a minimal amount of complexity while maintaining the model's invariance. The function operates by randomly selecting a leaf node and adding two new nodes to it and procedes as follow:
+In this project, a function has been implemented to dynamically increase the size of the tree as the complexity of the problem increases. This process of finding an optimal structure is referred to as architecture search. The implemented function demonstrates only one of many possible techniques for growing the tree structure. This technique is a simple approach and will add only a minimal amount of complexity while maintaining the model's invariance. It is important to note that the strategy is restricted in the sense that it can only add nodes and not remove them, the functions of the added nodes are taken from the previous tree, and the nodes are added by randomly selecting the place where they will be added. All of these factors can be changed in order to create new strategies that will further develop architecture search for binary trees.
+
+The initial idea was to add one new node at a time, but it was quickly abandoned because it would not maintain the invariance of the model. For example, imagine an initial tree with five nodes, where the output of the linear function in the root decides to go to the left node and from there on, the linear function of that node decides to go to its right node. If we add one new node as a left child of that particular node, the model of the node would have changed because the relative position of the node before the addition is not maintained. This is a problem in our case where we want to add the minimal amount of new complexity while keeping the model invariant.
+
+Therefore, another solution was to add two new nodes directly as child nodes, but this also presented difficulties in maintaining the same model within the new, larger tree structure. In this case, the node that has the same relative position to its parent as the node had before the insertion to its parent would need to take over the function and properties of the old leaf in order to maintain this invariance. That's when the idea of having one of the newly inserted nodes as the parent of the leaf node where the nodes will be inserted, and the other new node as its sibling emerged. In this way, the leaf node will remain a leaf while keeping the whole model invariant.
+
+Another decision that had to be made was whether to maintain the activations upon growing the tree. Initially, the idea was to reset the activation counter when adding the nodes. However, with the new implementation, it was more accurate to take over the current activations for the node that was set as the new parent and to set the counter to zero for the node put as the sibling. This approach helped maintain the model invariant.
+
+Finally, the number of weights and nodes needed to be updated throughout the tree when inserting the new nodes. This issue surfaced once the tree implementation was completed, and it did not work correctly because the nodes did not get the correct amount of weights for their functions to perform. To resolve this, a pointer for each node of the tree was added to its parent node. This allowed traversing the tree from bottom to top while updating the number of weights and nodes during the traversal.
+
+The actual strategy for randomly selecting the place to add two new nodes proceeds as follows:
 
 \begin{itemize}
 \item It begins by traversing the tree randomly until it reaches a leaf node. The pseudo code shown in Algorithm~\ref{algo:pseudo_pickrandom_function} illustrates the implementation of the $pick\_random\_leaf$ function which does this job
@@ -334,11 +358,17 @@ A reward is given to the robot when it is able to move forward without falling. 
 
 The "normal" version is considered solved when 300 points are earned within 1600 time steps. For the "hardcore" version, the same amount of points has to be earned within 2000 time steps. The goal is to achieve the highest possible reward while avoiding falling and moving as efficiently as possible. Like for the Lunar Landar, the values can be adjusted to fine-tune the agent's behaviour.
 
-\section{\texttt{Fitness} module}
+\section{Control Loop and Performance Evaluation}
 
-The fitness module acts as a bridge between the model and the environment, making it a crucial component in reinforcement learning algorithms. It provides the mechanism for feedback and evaluation of the agent's performance, allowing it to learn and optimize its behavior. The \texttt{fit}function, at the core of the fitness module, implements the control loop, evaluating the quality of the agent's actions based on the rewards provided by the environment.
+To evaluate the efficiency of a model in solving tasks in a given environment, a bridge is needed between the model and the environment. This interface extracts actions from the model, which are then performed by the agent and evaluated in relation to its performance in solving the given problem. It is a crucial component in reinforcement learning algorithms, providing the mechanism for feedback and evaluation of the agent's performance, allowing it to learn and optimize its behavior.
 
-The efficiency of the agent is calculated by summing the rewards received over the course of a single episode, which is given as the output of the \texttt{fit} function. This score is used to guide the learning process and update the agent's parameters, helping it to continually improve its performance. The pseudo code in Algorithm~\ref{algo:pseudo_fit_function} illustrates the basic elements of the \texttt{fit} function.
+The \texttt{fit} function, at the core of this interface, implements the control loop, evaluating the quality of the agent's actions based on the rewards provided by the environment. The action is extracted from the model. A distinction is also made between environments with a discrete action space and those with a continuous action space, as shown in Figure \ref{env_model_interface}. Once the agent performs the action provided by the model, it receives feedback on the execution of its action. This feedback contains information about the new state of the environment, including the agent itself, as well as a reward that determines if the action was suitable for solving the task. If the problem is solved, the loop finishes.
+
+The efficiency of the agent is calculated by summing the rewards received over the course of a single episode, which is the output of the \texttt{fit} function. This score is used to guide the learning process and update the agent's parameters, helping it to continually improve its performance. The pseudo-code in Algorithm \ref{algo:pseudo_fit_function} illustrates the basic elements of the \texttt{fit} function.
+
+
+
+
 
 \begin{algorithm}
 \caption{\texttt{fit} function}
@@ -363,13 +393,14 @@ The efficiency of the agent is calculated by summing the rewards received over t
 \end{algorithm}
 
 
-\section{\texttt{Env\_model\_interface} module}
+\section{Adjusting Action Selection for Discrete and Continuous Control Tasks}
+\label{env_model_interface}
 
-Depending on whether the environment has a discrete or continuous action space, the module needs to make some adjustments through its two functions, \texttt{is\_env\_discr\_or\_cont} and \texttt{get\_action}.
+When we're trying to control things, like robots or machines, we need to make decisions about what actions to take. These actions can be either specific things to do or more continuous movements. Environments with either a discrete or continuous action space, as well as discrete or continuous observation spaces, need to be distinguished.
 
-The function \texttt{is\_env\_discr\_or\_cont} determines whether the action space of the given environment is discrete or continuous. If it is discrete, the number of actions required for the output of the binary tree is set to the number of actions in the action space. If the action space is continuous, the number of actions is determined, and a lambda function is created to rescale the action within the action boundaries. This function assumes that the output of the 'action' is between zero and one, as is the case for a logistic function, for example.
+OpenAI Gym helps us by telling us whether we're dealing with specific actions or continuous movements. If we're dealing with specific actions, we just use the number of actions in the program. If we're dealing with continuous movements, we need to rescale our actions to make sure they fit within the allowed movements. We create a special program for this, called a lambda function. This lambda function should take as input an action that needs to be between zero and one (e.g., logistic function) and rescale that action into the boundaries allowed for the function.
 
-The function \texttt{get\_action} is used by the \texttt{fit} function to retrieve the action from the model. It takes the model and the current observation of the environment as inputs. The function first obtains the action through activation of the binary tree. If the environment is determined to be continuous by \texttt{is\_env\_discr\_or\_cont}, the action is rescaled and returned as the output. This means that all outputs of the binary tree are used and they correspond to the signal to send to each control, which requires regression to approximate an action based on the given outputs. If the environment is discrete, the function selects the action with the highest activation by examining the leaf reached by the activation of the binary tree. The procedure is outlined in the pseudocode in Algorithm~\ref{algo:pseudo_fit_function}.
+Next, a function is created to extract the action from the environment and readapt the output to be consistent with the type of action space. This function is used by the control loop to retrieve the action from the model that the agent should execute. The function takes the model and the current observation of the environment as inputs. It first obtains the action through activation of the binary tree. If the environment is determined to be continuous by the above procedure, the action is rescaled and returned as the output. This means that all outputs of the binary tree are used and they correspond to the signal to send to each control, which requires regression to approximate an action based on the given outputs. If the environment is discrete, the function selects the action with the highest activation by examining the leaf reached by the activation of the binary tree. The procedure is outlined in pseudocode in Algorithm~\ref{algo:pseudo_get_action_function}.
 
 \begin{algorithm}
 \caption{\texttt{get\_action} function}
