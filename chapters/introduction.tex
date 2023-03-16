@@ -15,8 +15,8 @@ A neural network can be represented as a computational graph that combines a ser
 \begin{figure}[!ht]
 \centering
 \fbox{\includegraphics[width=.8\textwidth]{neural_network}}
-\caption[Neural network and its components]{
-  \textbf{Neural network} process incoming input data through a structure consisting of two hidden layers, one with three neurons and one with two, and an output layer with a single neuron. The output produced by the network is determined by passing it through an activation function, which represents the final output of the network.
+\caption[Neural network representation]{
+  \textbf{Neural network illustration}which process incoming input data through a structure consisting of two hidden layers, one with three neurons and one with two, and an output layer with a single neuron. The output produced by the network is determined by passing it through an activation function, which represents the final output of the network.
   }
 \label{fig:neural_network}
 \end{figure}
@@ -28,7 +28,7 @@ The structure of a neural network, including the number of layers and number of 
 
 \section{Binary trees}
 
-Trees are a type of data structure that are commonly used in computer science and mathematics. They consist of nodes, which are connected by edges. Trees are special because they are a type of graph that is undirected, connected, and acyclic, meaning that nodes are connected by edges, but there are no loops or cycles in the graph.
+Trees are a type of data structure that are commonly used in computer science and mathematics. They consist of nodes, which are connected by edges. Trees can be seen as a special type of graphs that are undirected, connected, and acyclic, meaning that nodes are connected by edges, but there are no loops or cycles in the graph.
 
 In a tree, each node is either a parent or a child. The top node, with no parent, is called the root, while the bottom nodes with no children are called leaves. The distance from the root node determines the level of the node, with the root at level 0 and its children at level 1, and so on. Nodes on the same level are called siblings.
 
@@ -41,8 +41,8 @@ For this project, a specific type of binary tree will be used, in which all node
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=.5\textwidth]{binary_tree}
-\caption[Binary tree]{
-  \textbf{Binary tree} where the blue nodes illustrate leafs and the red node is the root of the tree
+\caption[Binary tree representation]{
+  \textbf{Binary tree illustration} where the blue nodes illustrate leafs and the red node is the root of the tree.
   }
 \label{fig:binary_tree}
 \end{figure}
@@ -55,9 +55,17 @@ Neural networks have seen significant advancements in recent years, due in large
 
 Until now, neural architecture search algorithms tend to be slow and expensive due to the need to train a large number of candidate networks to inform the search process. The paper by \cite{mellor_neural_nodate} showed that a possible solution to speed up this process would be to perform neural architecture search without any network training. The authors implemented a search algorithm called "NASWOT," which only makes observations on the initial untrained networks in the scope of convolutional networks.
 
-The concept of automatically searching for structures that improve model performance without manual intervention can also be applied to binary tree models. A complex reinforcement learning task would usually require a larger binary tree, as this would increase the search space for policies and, thereby, improve the probability of finding good solutions. To achieve this, it is important to adapt the size of the tree according to the complexity of the task. By dynamically incrementing the size of the tree, various strategies can be implemented. The first decision is where to add or remove new nodes in the tree and how many to add. For example, nodes could be added from left to right until the level is full and then proceed to the next layer, or they could be added to a randomly selected leaf, as is the case in this project. Another decision is when to change the size of the tree dynamically. If the tree structure changes too rapidly, the algorithm may not have enough time to search for solutions in the actual search space, whereas waiting too long could result in the algorithm getting stuck in a local optimum and wasting time. Therefore, it is important to strike a balance and change the size of the tree at the right moment. Additionally, it is important to decide which functions the newly created nodes should have. Should they be the same as their parent nodes, or should they be different? Finally, another surprising consideration is whether the newly added nodes should be leaves, which is not the case in this project, as you will see later.
+The process of architecture search, which involves searching for structures that improve model performance without manual intervention, has been widely applied to neural networks. However, it can also be applied to binary tree models. In particular, for complex reinforcement learning tasks, a larger binary tree is usually required to increase the search space for policies and improve the probability of finding good solutions. Therefore, it is important to adapt the size of the tree according to the complexity of the task.
 
-All of these decisions and more must be made and possibly compared when deciding which node-adding strategy to implement. It is important that, even if the tree structure changes, the mathematical equation of the tree remains invariant, which can be a challenging aspect to implement and can also limit the strategies that can be used.
+One approach to achieving this is by dynamically incrementing the size of the tree, using various strategies to add or remove nodes. For example, nodes could be added from left to right until the level is full and then proceed to the next layer, or they could be added to a randomly selected leaf. In this project, the latter approach is taken for this project as you will see later.
+
+A challenge to consider is the timing at which the dynamic adaptation of the tree should occur, as changing the size of the tree too rapidly could lead to the algorithm not having enough time to search for solutions in the actual search space. Conversely, waiting too long could result in the algorithm getting stuck in a local optimum and wasting time. Therefore, it is important to strike a balance and change the size of the tree at the right moment.
+
+Another important consideration is what functions the newly created nodes should have. Should they be the same as their parent nodes, or should they be different? This decision can have a significant impact on the performance of the model.
+
+Finally, an unexpected consideration is whether the newly added nodes should be leaves or not. In this project, the decision is made to not add leaves, but the impact of this decision is discussed further in the project.
+
+All of these decisions and more must be made and possibly compared when deciding which inserting strategy to implement. It is important that, even if the tree structure changes, the model remains invariant, which can be a challenging aspect to implement and can also limit the strategies that can be used.
 
 
 \section{Motivation and Hypothesis for Discontinuous Models in Reinforcement Learning}
@@ -70,14 +78,26 @@ An example of a non-continuous control problem is the swing-up cartpole task. Th
 
 The hypothesis of this project is that discontinuous models would have an advantage in addressing these tasks. Binary trees are used to approximate discontinuities by using a hyperplane to partition the observation space, and depending on the chosen subtree (by going to the left or right child), a different policy will be used. To test this hypothesis, multiple individuals can be evaluated in the environment (by running them through the fitness function) and their performance analyzed, along with other metrics such as the number of individuals that successfully solve the task. Hyperparameters also play an important role in improving the performance of individuals in the environment.
 
+
 \begin{figure}[!ht]
-\centering
-\fbox{\includegraphics[width=.8\textwidth]{swing_up}}
-\caption[Non-continuous control task]{
-  \textbf{Cart-pole swing up problem} On the left side, the initial state of the problem is depicted where the pole is pointing downwards and needs to be swung up by moving the blue cart on the horizontal line. On the right side, the cart has successfully managed to swing the pole up and now needs to stabilize it vertically.
-  }
-\label{fig:swing_up}
+    \centering
+    \begin{subfigure}{.48\textwidth}
+        \centering
+        \fbox{\includegraphics[width=1\linewidth]{swing_up_initial}}
+        \caption{In the initial task the pole is pointing downwards and needs to be swung up by moving the blue cart on the horizontal line.} 
+        \label{swing_up_initial}
+    \end{subfigure}%
+    \hspace{1em}
+    \begin{subfigure}{.48\textwidth}
+        \centering
+        \fbox{\includegraphics[width=1\linewidth]{swing_up_running}} 
+        \caption{The cart has successfully managed to swing the pole up and now needs to stabilize it vertically in a second phase.} 
+        \label{swing_up_running}
+    \end{subfigure}
+    \caption{Cart-pole swing up problem as representation of a non-continuous control task}
+    \label{fig:swing_up}
 \end{figure}
+
 
 \section{Contribution}
 
