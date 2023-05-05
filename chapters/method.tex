@@ -3,24 +3,24 @@
 \chapter{Method}
 \label{ch:method}
 
-This chapter presents the core contribution of the project, focusing on the binary tree model with a particular emphasis on two key functions. The efficiency of the model was tested on two OpenAI Gym environments, which will be discussed. Additionally, some basic reinforcement learning components and their adaptations for this project will be presented. The code for this chapter is written in Python and can be found on Github\footnote{$https://github.com/DavidGauc/btree\_model/$}.
+This chapter presents the core contribution of the project, focusing on the binary tree model with a particular emphasis on two key functions. The efficiency of the model was tested on two OpenAI Gym environments, which will be discussed. Additionally, some basic reinforcement learning components and their adaptations for this project will be presented. The code for this chapter is written in Python and can be found on Github \footnote{\url{$https://github.com/DavidGauc/btree\_model/$}}.
 
 \section{Model}
 Models are tools used to represent a range of functions, and the number of functions a model can represent depends on the specific model used. However, every model can only approximate a finite number of functions.
 
 This project employs binary trees as a unique method to approximate control policies using the reinforcement learning approach. Compared to traditional neural network models, binary trees offer potential benefits, including improved performance and interpretability. Additionally, binary trees do not require back-propagation or continuous functions, which makes them a more efficient and effective solution.
 
-The binary tree model is being used to solve continuous control problems in this project. It takes in information about the current state of the environment and outputs the appropriate action for the agent to take. The goal is to use the binary tree to approximate the best action for the agent to take given the current state, making the model an effective tool to approximate control policies.
+The binary tree model is being used to solve continuous control problems in this project. It takes information about the current state of the environment as input and outputs the appropriate action for the agent to take. The goal is to use the binary tree to approximate the best action for the agent to take given the current state, making the model an effective tool to approximate control policies.
 
 \subsection{\texttt{Node} module}
-A node in a binary tree is composed of a pointer that points to its parent node, a function from a defined function class, and an assigned weight that adjusts the importance of the decision or computation made at that node. Additionally, the node has two pointers - one to its left child and one to its right child - that are used to traverse the tree and make decisions based on the input data and the functions applied at each node. The basic functioning of this module was already implemented at the beginning of the project. An important addition that needs to be made is to have a pointer to the parent, which was not necessary before having a method to dynamically increase the tree size. Each node in the tree needs to know its parent node in order to transmit the updated number of weights and nodes once new nodes are added to the tree, as you will see in \ref{model_functioning}. Figure~\ref{fig:node_composition} illustrates a binary tree with a single node to show the different elements that compose a node in this model and the pointers that are assigned to it.
+A node in a binary tree is composed of a pointer that points to its parent node, a function from a defined function class, and an assigned weight that adjusts the importance of the decision or computation made at that node. Additionally, the node has two pointers, one to its left child and one to its right child, that are used to traverse the tree and make decisions based on the input data and the functions applied at each node. The basic function of this module was already implemented at the beginning of the project. An important addition that needs to be made is to have a pointer to the parent, which was not necessary before having a method to dynamically increase the tree size. Each node in the tree needs to know its parent node in order to transmit the updated number of weights and nodes once new nodes are added to the tree, as you will see in \ref{model_functioning}. Figure~\ref{fig:node_composition} illustrates a binary tree with a single node to show the different elements that compose a node in this model and the pointers that are assigned to it.
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=.2\textwidth]{node}
 
 \caption[Components of a single-node tree]{
   \textbf{Components of a single-node tree}
-Representation of a binary tree with a single node. The $root$ pointer points to the node, and the $parent$ pointer points to nothing as it is a single-node tree. The main components of the node are a function $fn$ that is implemented in the function module, an amount of weights $nw$ it contains, and two pointers to its left and right child ($left$, $right$) which point to None in this case.
+Representation of a binary tree with a single node. The \texttt{root} pointer points to the node, and the \texttt{parent} pointer points to nothing as it is a single-node tree. The main components of the node are a function \texttt{fn} that is implemented in the function module, an amount of weights \texttt{nw} it contains, and two pointers to its left and right child (\texttt{left}, \texttt{right}) which point to \texttt{None} in this case, making this node a leaf.
  }
 \label{fig:node_composition}
 \end{figure}
@@ -28,19 +28,19 @@ Representation of a binary tree with a single node. The $root$ pointer points to
 \subsection{\texttt{Functions} module}
 Each node in the binary tree contains a function that is used to make decisions or perform computations based on the input data. In the project, three function types were implemented: constant, linear, and perceptron.
 
-The constant function returns the weights as output regardless of the input values, while the linear function returns the dot product of the weights and the observations it received as input. The perceptron uses the sigmoid activation function
+The constant function returns the weights as output regardless of the input values, while the linear function returns the dot product of the weights and the observations it received as input. The perceptron uses the logistic activation function
 \begin{equation}
 \frac{1} {(1 + \exp(-x))}
 \end{equation}
- to transform the dot product between the weights and observations (denoted as $x$) into a scalar value that can be used to perform computations.
+ to transform the dot product between the weights and observations (denoted as $x$) nonlinearly to perform computations.
 
-Each instance of the function class contains the number of inputs and outputs, the weights used by the function, and the number of times the function has been activated. The weights can be learned or fixed, and the input and output values can take a specific range.
+Each instance of the function class stores the number of inputs and outputs, the weights used by the function, and the number of times the function has been activated. The weights can be learned or fixed, and the input and output values can take a specific range.
 
 The module also includes a way to set the required amount of weights needed for each function and return the unused weights. Additionally, it increases a counter each time a function is activated in the tree. This allows us to see which nodes and functions were activated the most during the process, which is important for analysis, especially when determining which tree structure is most convenient for solving different problems.
 
 An important add-on that was implemented in this project is the ability to copy a function. This feature will be used in the node insertion strategy presented later.
 
-For non-leaf nodes in the tree, it is convenient to use linear functions because their output will be a scalar value that is useful for traversing the tree. The details of how the functions, weights, and pointers are used to make decisions and perform computations in the tree can be found in the activate function in \ref{binary_tree}.
+For non-leaf nodes in the tree, it is convenient to use linear functions because their output will be a scalar value that is useful for traversing the tree. The details of how the functions, weights, and pointers are used to make decisions and perform computations in the tree can be found in the \texttt{activate} function in \ref{binary_tree}.
 
 \subsection{\texttt{BTree} module}
 
@@ -62,7 +62,9 @@ The module enables the retrieval of basic information about the binary tree, suc
 \subsection{Model functioning}
 \label{model_functioning}
 
-The process of using the tree to make decisions or perform computations is referred to as activation. This procedure enables the use of a classical data structure like the binary tree for solving reinforcement learning problems. The model uses the reinforcement learning paradigm by getting observations as inputs and outputting actions for the agent to take through the activation of the binary tree. The resulting activation of the model is a good policy approximator which makes use of the advantages discussed in the introduction. An important role is taken by the function that determines how to traverse the tree in such a way that the observations result in convenient actions for the agent to take by getting information about the current state of the environment. The function implemented for this model is represented as pseudocode in Algorithm~\ref{algo:pseudo_activate_function}. The \texttt{activate\_function} starts at the root of the tree and navigates through the links between nodes based on the output of the current node's function. The functions that are not leaf nodes use a linear function in the case of this project. This means the function takes the observations as inputs and gives out a scalar. If the value of the scalar is positive, the left child node is chosen, else the right child node is chosen. By repeating this, the function will eventually get to the bottom of the tree. When reaching a leaf node, the function will return the output obtained by passing the observations as input to the function implemented in that particular node. In the case of this project, leaf nodes will either use a constant function or perceptrons. The outputs will need to be interpreted differently depending on whether the action space is discrete or continuous, as you will see in \ref{env_model_interface}. But basically, this will tell the agent which actions it should perform.
+The process of using the tree to make decisions or perform computations is referred to as activation. This procedure enables the use of a classical data structure like the binary tree for solving reinforcement learning problems. The model uses the reinforcement learning paradigm by getting observations as inputs and outputting actions for the agent to take through the activation of the binary tree. The resulting activation of the model is a good policy approximator which makes use of the advantages discussed in the introduction. An important role is taken by the function that determines how to traverse the tree in such a way that the observations result in convenient actions for the agent to take by getting information about the current state of the environment. The function implemented for this model is represented as pseudocode in Algorithm~\ref{algo:pseudo_activate_function}.
+
+The \texttt{activate\_function} starts at the root of the tree and navigates through the links between nodes based on the output of the current node's function. The functions that are not leaf nodes use a linear function in the case of this project. This means the function takes the observations as inputs and gives out a scalar. If the value of the scalar is positive, the left child node is chosen, else the right child node is chosen. By repeating this, the function will eventually get to the bottom of the tree. When reaching a leaf node, the function will return the output obtained by passing the observations as input to the function implemented in that particular node. In the case of this project, leaf nodes will either use a constant function or perceptrons. The outputs will need to be interpreted differently depending on whether the action space is discrete or continuous, as explained in section \ref{env_model_interface}. But basically, this will tell the agent which actions it should perform.
 
 The construction of the tree involves determining the decision points in the tree, which are selected based on the input data and the problem to be solved. The tree can be trained and updated by adjusting its functions, weights, and links between nodes.
 
@@ -73,7 +75,7 @@ Compared to other models like neural networks and decision trees, binary trees h
 \label{algo:pseudo_activate_function}
 \begin{algorithmic}[1]
 \Function{activate}{$obs$}
-\State $node \gets \texttt{self.root}$\Comment starting from the root 
+\State $node \gets \texttt{root}$\Comment starting from the root 
 \While{True}
 \If{$node$ is a leaf}
     \Return $node.fn(obs)$ \Comment output of $node$'s function
@@ -97,13 +99,13 @@ Therefore, another solution was to add two new nodes directly as child nodes, bu
 
 Another decision that had to be made was whether to maintain the activations upon growing the tree. Initially, the idea was to reset the activation counter when adding the nodes. However, with the new implementation, it was more accurate to take over the current activations for the node that was set as the new parent and to set the counter to zero for the node put as the sibling. This approach helped maintain the model invariant.
 
-Finally, the number of weights and nodes needed to be updated throughout the tree when inserting the new nodes. This issue surfaced once the tree implementation was completed, and it did not work correctly because the nodes did not get the correct amount of weights for their functions to perform. To resolve this, a pointer for each node of the tree was added to its parent node. This allowed traversing the tree from bottom to top while updating the number of weights and nodes during the traversal.
+Finally, the number of weights and nodes needed to be updated throughout the tree when inserting the new nodes. This issue surfaced once the tree implementation was completed, and it did not work correctly because the nodes did not get the correct amount of weights for their functions to perform. A pointer for each node of the tree was added to its parent node in order to resolve this. This allowed traversing the tree from bottom to top while updating the number of weights and nodes during the traversal.
 
 The actual strategy for randomly selecting the place to add two new nodes proceeds as follows:
 
 \begin{itemize}
-\item It begins by traversing the tree randomly until it reaches a leaf node. The pseudo code shown in Algorithm~\ref{algo:pseudo_pickrandom_function} illustrates the implementation of the function that traverses a tree randomly.
-\item It verifies if the selected leaf is the root of the tree or not.
+\item Begin by traversing the tree randomly until reaching a leaf node(Algorithm~\ref{algo:pseudo_pickrandom_function}).
+\item Verify if the selected leaf is the root of the tree or not.
 \item If it is, a new parent node is created.
 \item If not, the leaf's parent node is duplicated to create a new parent node.
 \item The new parent node is then set as the parent of the current leaf node.
@@ -111,7 +113,7 @@ The actual strategy for randomly selecting the place to add two new nodes procee
 \item Lastly the information about the new number of weights and nodes added during the process is propagated up so that every node is updated with this information.
 \end{itemize}
 
-The new nodes are added to the tree in such a way that the current leaf node's relative position to its previous parent node remains unchanged.For more details about the implementation the pseudo code of the function is shown in Algorithm~\ref{algo:pseudo_add_node_function}.
+The new nodes are added to the tree in such a way that the current leaf node's relative position to its previous parent node remains unchanged. In order to keep track of the relative position of the reached node, the \ref{algo:pseudo_pickrandom_function} stores the last direction taken before reaching the leaf. For more details about the implementation the pseudo code of the function is shown in Algorithm~\ref{algo:pseudo_add_node_function}.
 
 \begin{algorithm}[!ht]
 \caption{\texttt{pick\_random\_leaf} function}
@@ -129,12 +131,13 @@ The new nodes are added to the tree in such a way that the current leaf node's r
 \State $last\_direction \gets 'right'$ 
 \EndIf
 \EndWhile
+
 \Return ($current, last\_direction$)
 \EndFunction
 \end{algorithmic}
 \end{algorithm}
 
-It is important to note that the function does not add two child nodes directly to the leaf node, but instead adds one node as the parent of the leaf node and the other as its sibling. As shown in Figure~\ref{fig:add_node}, this is an example of adding two nodes to a binary tree. Figure~\ref{fig:add_node_before} shows a binary tree with five nodes before using the node adding strategy. Figure~\ref{fig:add_node_after} then shows the binary tree incremented by two new node with their position in the tree. After the addition of these new nodes, all the links in the tree must be updated, and information regarding the number of weights and the number of descendants must be refreshed. To achieve this, the function employs a process of propagating the information from the current leaf node to the root of the tree.
+It is important to note that the function does not add two child nodes directly to the leaf node, but instead adds one node as the parent of the leaf node and the other as its sibling. As shown in Figure~\ref{fig:add_node}, this is an example of adding two nodes to a binary tree. Figure~\ref{fig:add_node_before} shows a binary tree with five nodes before using the node adding strategy. Figure~\ref{fig:add_node_after} then shows the binary tree incremented by two new nodes with their position in the tree. After the addition of these new nodes, all the links in the tree must be updated, and information regarding the number of weights and the number of descendants must be refreshed. To achieve this, the function employs a process of propagating the information from the current leaf node to the root of the tree. 
 
 \begin{figure}[!ht]
     \centering
@@ -148,10 +151,10 @@ It is important to note that the function does not add two child nodes directly 
 \begin{subfigure}{.48\textwidth}
     \centering
     \includegraphics[width=0.6\linewidth]{add_node_after} 
-    \caption{Representation of the tree aftesbr adding two nodes using the \texttt{add\_node} function. The yellow node is the newly created parent node and the green node is the sibling of the previously existing red nodesb. It is important to note that the red node retains its relative position to the parent node} 
+    \caption{Representation of the tree after adding two nodes using the \texttt{add\_node} function. The yellow node is the newly created parent node and the green node is the sibling of the previously existing red nodes. It is important to note that the red node retains its relative position to the parent node.} 
     \label{fig:add_node_after}
 \end{subfigure}
-\caption{Addition of two nodes in a binary tree with the \texttt{add\_node} function}
+\caption{Addition of two nodes in a binary tree with the \texttt{add\_node} function which adds two new nodes as parent and sibling node of a randomly reached leaf node.}
 \label{fig:add_node}
 \end{figure}
 
@@ -166,9 +169,9 @@ It is important to note that the function does not add two child nodes directly 
     \State create $new\_parent$ node with a linear function
     \State take over the number of activations from $current$ to $new\_parent$
     \State $last\_direction \gets 'left'$ \Comment doesn't matter if its the root
-    \State $\texttt{self.root} \gets new\_parent$ \Comment $new\_parent$ is the root
+    \State $\texttt{root} \gets new\_parent$ \Comment $new\_parent$ is the root
 \Else
-    \State copy $current$'s parent into $new\_parent$ node
+    \State $new\_parent \gets current.parent$
     \State take over the number of activations from $current$'s parent to $new\_parent$
 \EndIf
 \State create $copy\_node$ \Comment copy of $current$
@@ -182,25 +185,25 @@ It is important to note that the function does not add two child nodes directly 
     \State raise error
 \EndIf
 
-\State Set $new\_parent$'s parent to $current$'s parent\Comment fix parent links
-\State Set $current$'s parent to $new\_parent$
-\State Set $copy\_node$'s parent to $new\_parent$
+\State $new\_parent.parent \gets current.parent$\Comment fix parent links
+\State $current.parent \gets new\_parent$
+\State $copy\_node.parent \gets new\_parent$
 
-\If{$new\_parent$ is not the root}
+\If{$new\_parent$ is not root}
     \If{$last\_direction$ is 'right'}
-        \State set $new\_parent$ as right child of its parent node
+        \State $new\_parent.parent.right\_child \gets new\_parent$\
     \ElsIf{$last\_direction$ is 'left'}
-        \State set $new\_parent$ as left child of its parent node
+        \State $new\_parent.parent.left\_child \gets new\_parent$\
     \Else
         \State raise error
     \EndIf
 \EndIf
 
-\If{$new\_parent$ is not the root}
+\If{$new\_parent$ is not root}
     \State $parent\_iter \gets parent of new\_parent$ \Comment starting point for progating up
     \While{True}
-        \State number of wheights of $parent\_iter$ is incremented by wheights of newly created nodes
-        \State number of nodes of $parent\_iter$ is incremented by nodes of newly created nodes
+        \State $parent\_iter.nweights$ += weights of newly created nodes
+        \State $parent\_iter.nnodes$ += weights of newly created nodes
         \If{$parent\_iter$ is root}
             \State break
         \Else
@@ -210,18 +213,18 @@ It is important to note that the function does not add two child nodes directly 
     \EndWhile
 \EndIf
 
-\State Add to the number of weights of $new\_parent$ the number of weights of its two children nodes
-\State Add to the number of nodes of $new\_parent$ the number of nodes of its two children nodes
+\State $new\_parent.nweights$ += number of weights of its two children nodes
+\State $new\_parent.nnodes$ += number of nodes of its two children nodes
 
 \EndFunction
 \end{algorithmic}
 \end{algorithm}
 
-The function for expanding the size of the tree adapts to the complexity of the problem by growing based on a stagnation threshold, which is determined by a lack of improvement in the score for a certain number of steps. A larger tree has a greater search space, which enables it to handle more complex problems. However, it also increases computational time, making it crucial to strike a balance between expanding the tree too rapidly or too slowly.
+The function for expanding the size of the tree adapts to the complexity of the problem by growing based on a fitness stagnation threshold, which is determined by a lack of improvement in the score for a certain number of steps. A larger tree has a greater search space, which enables it to handle more complex problems. However, it also increases computational time, making it crucial to strike a balance between expanding the tree too rapidly or too slowly.
 
 \section{Environments}
 
-For this project, two environments from the Box2D category of OpenAI Gym were utilized\footnote{https://www.gymlibrary.dev/environments/box2d/}. These environments are more complex than the "Classical Control" problems and offer greater configurability. Box2D is a 2D physics engine designed for games that enables objects to move in a realistic manner, enhancing game interactivity(\cite{noauthor_box2d_nodate}).
+For this project, two environments from the Box2D category of OpenAI Gym were utilized\footnote{\url{https://www.gymlibrary.dev/environments/box2d/}}. These environments are more complex than the "Classical Control" problems and offer greater configurability. Box2D is a 2D physics engine designed for games that enables objects to move in a realistic manner, enhancing game interactivity~\cite{noauthor_box2d_nodate}.
 
 \subsection{Lunar Lander}
 The Lunar Lander environment simulates a scenario where a rocket must land between two flags on the surface of the Moon. The rocket has three engines that can either be fired at full speed or turned off. This environment is available in both a continuous and a discrete version. In this project, the discrete version was utilized. For the continuous version to work the output needs to be normalized in order to give out values in the range of -1 and 1. The figure shown in Figure~\ref{fig:lunar_lander} depicts the various states that the rocket can be in during the landing process.
@@ -245,12 +248,12 @@ The Lunar Lander environment simulates a scenario where a rocket must land betwe
         \fbox{\includegraphics[width=1\linewidth]{land_lunar_lander}}  
         \caption{Successful landing between the two flags}
     \end{subfigure}
-    \caption{Different states of the Lunar Lander environmment}
+    \caption{Different states of the Lunar Lander environmment.}
     \label{fig:lunar_lander}
 \end{figure}
 
 \subsubsection{Action space}
-The environment has four available actions: do nothing, fire the left engine, fire the right engine, or fire the main engine pointing downwards. The strength at which the engines fire cannot be adjusted and is fixed, resulting in a discrete action space with a dimension of 4. In practice the action with the biggest value obtained through the model is chosen and a number from 0 to 3 is sent to the environment.
+The environment has four available actions: do nothing, fire the left engine, fire the right engine, or fire the main engine pointing downwards. The strength at which the engines fire cannot be adjusted and is fixed, resulting in a discrete action space with a dimension of 4. In practice the action with the biggest value obtained through the model is chosen and an action number from 0 to 3 is sent to the environment.
 
 \subsubsection{Observation space}
 The observation space for the Lunar Lander contains eight values.
@@ -259,18 +262,18 @@ Two of them are booleans that indicate whether the corresponding leg of the land
 \begin{table}[!ht]
 \centering
 \caption{Observation values for the Lunar lander}
-\begin{tabular}[t]{lcc}
+\begin{tabular}[t]{lcccc}
 \toprule
-& Min & Max \\
+Name & Description & Min & Max \\
 \midrule
-coordinates of the lander in x & -1.5  & 1.5  \\
-coordinates of the lander in y & -1.5  & 1.5  \\
-linear velocity in x           & -5.0  & 5.0  \\
-linear velocity in y           & -5.0  & 5.0  \\
-angle                          & -3.14 & 3.14 \\
-angular velocity               & -5.0  & 5.0  \\
-left leg touching ground       & 0     & 1    \\
-right leg touching ground      & 0     & 1    \\
+state[0]& coordinates of the lander in x & -1.5  & 1.5  \\
+state[1]& coordinates of the lander in y & -1.5  & 1.5  \\
+state[2]& linear velocity in x           & -5.0  & 5.0  \\
+state[3]& linear velocity in y           & -5.0  & 5.0  \\
+state[4]& angle                          & -3.14 & 3.14 \\
+state[5]& angular velocity               & -5.0  & 5.0  \\
+state[6]& left leg touching ground       & 0     & 1    \\
+state[7]& right leg touching ground      & 0     & 1    \\
 \bottomrule
 \end{tabular}
 \end{table}%
@@ -295,27 +298,27 @@ For the agent in the Lunar Lander environment, it receives a reward for successf
 \end{itemize}
 An additional reward of -100 or +100 points for crashing or landing safely respectively is obtained at the end of the episode. The final reward is the sum of all of these terms. The design of the reward encourages the agent to land the lander safely on the landing pad with minimum velocity, at a suitable angle, and with both legs in contact with the ground.
 
-The task is considered solved when the agent accumulates a total reward of 200 points or higher. It's worth noting that the exact rewards given for each action, state or event are not fixed and can be adjusted to fine-tune the agent's behavior, based on the specific implementation of the environment.
+The task is considered solved when the agent accumulates a total reward of 200 points or higher. It is worth noting that the exact rewards given for each action, state or event are not fixed and can be adjusted to fine-tune the agent's behavior, based on the specific implementation of the environment.
 
 \subsection{Bipedal Walker}
-This environment simulates a two-legged robot attempting to walk as far as possible on uneven terrain. There are two versions available: a "normal" version (Figure \ref{bipedal_normal}) and a more challenging "hardcore" version (Figure \ref{bipedal_hardcore}) which includes obstacles. The robot is composed of a hull and two legs, each with two joints, one connecting to the hull and the other allowing the leg to bend. Figure~\ref{fig:bipedal_walker} illustrates the robot in action on both versions.
+This environment simulates a two-legged robot attempting to walk as far as possible on uneven terrain. There are two versions available: a "normal" version (Figure \ref{bipedal_normal}) and a more challenging "hardcore" version (Figure \ref{bipedal_hardcore}) which includes obstacles. The robot is composed of a hull and two legs, each with two joints, one connecting to the hull (hip) and the other allowing the leg to bend (knee). Figure~\ref{fig:bipedal_walker} illustrates the robot in action on both versions.
 
 \begin{figure}[!ht]
     \centering
     \begin{subfigure}{.48\textwidth}
         \centering
         \fbox{\includegraphics[width=1\linewidth]{bipedal_normal}}
-        \caption{Bipedal walker in the "normal" environment version} 
+        \caption{Bipedal walker in the "normal" environment version where the soil is relatively flat} 
         \label{bipedal_normal}
     \end{subfigure}%
     \hspace{1em}
     \begin{subfigure}{.48\textwidth}
         \centering
         \fbox{\includegraphics[width=1\linewidth]{bipedal_hardcore}} 
-        \caption{Bipedal walker in the "hardcore" environment version} 
+        \caption{Bipedal walker in the "hardcore" environment version which includes some obstacles} 
         \label{bipedal_hardcore}
     \end{subfigure}
-    \caption{Bipedal walker performing on both environment versions}
+    \caption{Bipedal walker performing on both environment versions provided by OpenAI Gym.}
     \label{fig:bipedal_walker}
 \end{figure}
 
@@ -323,24 +326,24 @@ This environment simulates a two-legged robot attempting to walk as far as possi
 The actions of the bipedal walker are continuous, with four actions available, corresponding to the motor speed values of each joint. The values range from -1 to 1 and determine the movement and stability of the robot. It's possible to adjust the range of values in different implementations of the environment.
 
 \subsubsection{Observation space}
-The observation space for the bipedal walker has a dimension of 24 and consists of continuous values, as well as a few boolean values that indicate whether the legs are in contact with the ground or not. The observation space includes information such as the angle, angular velocity, linear velocity, and position of the torso of the robot. It's worth noting that the exact position of the robot is not explicitly stated in the observation space, but it can be derived from other observations, such as the linear and angular velocities of the joints.
+The observation space for the bipedal walker has a dimension of 24 and consists of continuous values, as well as a few boolean values that indicate whether the legs are in contact with the ground or not. The observation space includes information such as the angle, angular velocity, linear velocity, and position of the torso of the robot. It is worth noting that the exact position of the robot is not explicitly stated in the observation space, but it can be derived from other observations, such as the linear and angular velocities of the joints.
 
 \begin{table}[!ht]
 \centering
 \caption{Observation values for the Bipedal Walker}
-\begin{tabular}{lcc}
+\begin{tabular}{lcccc}
 \toprule
-& Min & Max \\
+Name& Description& Min & Max \\
 \midrule
-hull angle speed                    & -3.14 & 3.14 \\
-angular velocity                    & -5.0  & 5.0  \\
-horizontal speed                    & -5.0  & 5.0  \\
-vertical speed                      & -5.0  & 5.0  \\
-position of joints                  & -3.14 & 3.14 \\
-joints angular speed                & -5.0  & 5.0  \\
-left leg contact with ground        & 0     & 1    \\
-right leg contact with ground       & 0     & 1    \\
-10 lidar rangefinder measurements   & -1.0  & 1.0  \\
+state[0]             & hull angle speed                    & -3.14 & 3.14 \\
+state[1]             & angular velocity                    & -5.0  & 5.0  \\
+state[2]             & horizontal speed                    & -5.0  & 5.0  \\
+state[3]             & vertical speed                      & -5.0  & 5.0  \\
+state[4] - state[7]  & position of joints                  & -3.14 & 3.14 \\
+state[8] - state[11] & joints angular speed                & -5.0  & 5.0  \\
+state[12]            & left leg contact with ground        & 0     & 1    \\
+state[13]            & right leg contact with ground       & 0     & 1    \\
+state[14] - state[23]& 10 lidar rangefinder measurements   & -1.0  & 1.0  \\
 \bottomrule
 
 \end{tabular}
@@ -354,15 +357,15 @@ A reward is given to the robot when it is able to move forward without falling. 
 
   \item $-5.0 \times \lvert state[0] \rvert$: This calculates a penalty for deviating from keeping the head straight. $state[0]$ is the normalized angular velocity of the walker's head. The more the walker's head deviates from being straight, the higher the penalty.
 
-  \item $-0.00035 \times MOTORS\_TORQUE \times np.clip(\lvert a \rvert), 0, 1)$: This calculates a penalty for the use of motor torque by the agent the calculation is done for each motor of the walker. $MOTORS\_TORQUE$ is a constant that represents the maximum torque that a motor can apply. The larger the torque applied by a motor, the larger the penalty. The use of $np.clip$ ensures that the torque used is clipped to the range $[0, 1]$.
+  \item $-0.00035 \times MOTORS\_TORQUE \times np.clip(\lvert a \rvert), 0, 1)$: This calculates a penalty for the use of motor torque by the agent the calculation is done for each motor of the walker. $MOTORS\_TORQUE$ is a constant that represents the maximum torque that a motor can apply. The larger the torque applied by a motor, the larger the penalty. The use of \texttt{np.clip} ensures that the torque used is clipped to the range $[0, 1]$.
 
 \end{itemize}
 
-The "normal" version is considered solved when 300 points are earned within 1600 time steps. For the "hardcore" version, the same amount of points has to be earned within 2000 time steps. The goal is to achieve the highest possible reward while avoiding falling and moving as efficiently as possible. Like for the Lunar Landar, the values can be adjusted to fine-tune the agent's behaviour.
+The "normal" version is considered solved when 300 points are earned within 1600 time steps. For the "hardcore" version, the same amount of points has to be earned within 2000 time steps. The goal is to achieve the highest possible reward while avoiding falling and moving as efficiently as possible. Similarly to the Lunar Lander, the values can be adjusted to fine-tune the agent's behaviour.
 
 \section{Control Loop and Performance Evaluation}
 
-To evaluate the efficiency of a model in solving tasks in a given environment, a bridge is needed between the model and the environment. This interface extracts actions from the model, which are then performed by the agent and evaluated in relation to its performance in solving the given problem. It is a crucial component in reinforcement learning algorithms, providing the mechanism for feedback and evaluation of the agent's performance, allowing it to learn and optimize its behavior.
+To evaluate the efficiency of a model in solving tasks in a given environment, an interface is needed between the model and the environment, that extracts actions from the model which are then evaluated in relation to its performance in solving the given problem. It is a crucial component in reinforcement learning algorithms, providing the mechanism for feedback and evaluation of the agent's performance, allowing it to learn and optimize its behavior.
 
 The \texttt{fit} function, at the core of this interface, implements the control loop, evaluating the quality of the agent's actions based on the rewards provided by the environment. The action is extracted from the model. A distinction is also made between environments with a discrete action space and those with a continuous action space, as will be explained in section \ref{env_model_interface}. Once the agent performs the action provided by the model, it receives feedback on the execution of its action. This feedback contains information about the new state of the environment, including the agent itself, as well as a reward that determines if the action was suitable for solving the task. If the problem is solved, the loop finishes.
 
@@ -377,32 +380,33 @@ The efficiency of the agent is calculated by summing the rewards received over t
 \label{algo:pseudo_fit_function}
 \begin{algorithmic}
 \Function{fit}{ind}
-\State reset the environment and get the observations
-\State set the weights of $ind$ in the model
+\State reset the environment and get initial observation
+\State set weights of $ind$ in to the model
 \State $score \gets 0$
-\State $ done \gets False$ \Comment False is a boolean
+\State $ done \gets False$ 
 \For{number of step $nsteps$}
-    \State $action \gets env\_model\_interface.get\_action($model,obs$)$
-    \State get new state of environment after executing $action$ step
-    \State increment $score$ with the obtained reward from the $action$ step
+    \State $action \gets get\_actions(model, obs)$
+    \State get new state of environment
+    \State $score$ += reward from the $action$ step
     \If{done}
         \State break
     \EndIf
 \EndFor
+
 \Return $score$ \Comment in our case $-score$ as we use CMA-ES
 \EndFunction
 \end{algorithmic}
 \end{algorithm}
 
 
-\section{Adjusting Action Selection for Discrete and Continuous Control Tasks}
+\section{Action Selection for Discrete and Continuous Control Tasks}
 \label{env_model_interface}
 
-When we're trying to control things, like robots or machines, we need to make decisions about what actions to take. These actions can be either specific things to do or more continuous movements. Environments with either a discrete or continuous action space, as well as discrete or continuous observation spaces, need to be distinguished.
+When we are trying to control things, like robots or machines, we need to make decisions about what actions to take. These actions can be either specific things to do or more continuous movements. Environments with either a discrete or continuous action space, as well as discrete or continuous observation spaces, need to be distinguished.
 
-OpenAI Gym helps us by telling us whether we're dealing with specific actions or continuous movements. If we're dealing with specific actions, we just use the number of actions in the program. If we're dealing with continuous movements, we need to rescale our actions to make sure they fit within the allowed movements. We create a special program for this, called a lambda function. This lambda function should take as input an action that needs to be between zero and one (e.g., logistic function) and rescale that action into the boundaries allowed for the function.
+OpenAI Gym helps us by telling us whether we are dealing with specific actions or continuous movements. If we are dealing with specific actions, we just use the number of actions in the program. If we are dealing with continuous movements, we need to rescale our actions to make sure they fit within the allowed movements. We create a special program for this, called a lambda function. This lambda function should take as input an action that needs to be between zero and one (e.g., logistic function) and rescale that action into the boundaries allowed for the function.
 
-Next, a function is created to extract the action from the environment and readapt the output to be consistent with the type of action space. This function is used by the control loop to retrieve the action from the model that the agent should execute. The function takes the model and the current observation of the environment as inputs. It first obtains the action through activation of the binary tree. If the environment is determined to be continuous by the above procedure, the action is rescaled and returned as the output. This means that all outputs of the binary tree are used and they correspond to the signal to send to each control, which requires regression to approximate an action based on the given outputs. If the environment is discrete, the function selects the action with the highest activation by examining the leaf reached by the activation of the binary tree. The procedure is outlined in pseudocode in Algorithm~\ref{algo:pseudo_get_action_function}.
+Next, a function is created to extract the action from the environment and re-adapt the output to be consistent with the type of action space. This function is used by the control loop to retrieve the action from the model that the agent should execute. The function takes the model and the current observation of the environment as inputs. It first obtains the action through activation of the binary tree. If the environment is determined to be continuous by the above procedure, the action is rescaled and returned as the output. This means that all outputs of the binary tree are used and they correspond to the signal to send to each control, which requires regression to approximate an action based on the given outputs. If the environment is discrete, the function selects the action with the highest activation by examining the leaf reached by the activation of the binary tree. The procedure is outlined in pseudocode in Algorithm~\ref{algo:pseudo_get_action_function}.
 
 \begin{algorithm}
 \caption{\texttt{get\_action} function}
@@ -417,15 +421,15 @@ Next, a function is created to extract the action from the environment and reada
 \Else
     \State raise Error
 \EndIf
+
 \Return $action$
 \EndFunction
 \end{algorithmic}
 \end{algorithm}
 
 \section{Challenges}
+\paragraph{Node insertion.}
+The main difficulty was encountered in implementing the node insertion strategy. The goal is to generate a model that is functionally equivalent to the previous best performing model but still capable of further improvement. This is achieved by adjusting more weights. If improvement is not achieved, the tree can be incremented in size until the critical complexity is reached and better scores are obtained. When adding new nodes, it's important to maintain the direction chosen during activation and the number of times each node's function was activated before the node addition. This means that if a node's function chose to go to the left child node during activation, the new larger tree should also go the same way, and the activation should lead to the same leaf but within a larger tree. The code memorizes the last direction chosen when randomly going through the tree, and when adding new nodes, the randomly selected leaf keeps its relative position to its new parent nodes. The implementation of a strategy that adheres to these constraints resulted in a reduced number of possibilities for the project, leading to some challenges. As an illustration, the addition of nodes had to be done in pairs, contrary to the initial plan of adding them individually. Furthermore, the newly inserted nodes were placed as the parent node of the selected leaf node for insertion and as its sibling node, instead of being added as child nodes. Additionally, the need to maintain the relative positions of the nodes prior to insertion, which implies preserving all the links, is a direct outcome of these constraints.
 
-\begin{itemize}
-  \item The main difficulty was encountered in implementing the node insertion strategy. The goal is to generate a model that is functionally equivalent to the previous best performing model but still capable of improvement. This is achieved by adjusting more weights. If improvement is not achieved, the tree can be incremented in size until the critical complexity is reached and better scores are obtained. When adding new nodes, it's important to maintain the direction chosen during activation and the number of times each node's function was activated before the node addition. This means that if a node's function chose to go to the left child node during activation, the new larger tree should also go the same way, and the activation should lead to the same leaf but within a larger tree. The code memorizes the last direction chosen when randomly going through the tree, and when adding new nodes, the randomly selected leaf keeps its relative position to its new parent nodes. The implementation of a strategy that adheres to these constraints resulted in a reduced number of possibilities for the project, leading to some challenges. As an illustration, the addition of nodes had to be done in pairs, contrary to the initial plan of adding them individually. Furthermore, the newly inserted nodes were placed as the parent node of the selected leaf node for insertion and as its sibling node, instead of being added as child nodes. Additionally, the need to maintain the relative positions of the nodes prior to insertion, which implies preserving all the links, is a direct outcome of these constraints.
-
-  \item Another challenge was ensuring that each node always knew the number of weights it and its descendants had. This information is crucial for the functions within the nodes. When adding new nodes to a tree, the number of weights for all ancestor nodes of the newly added nodes is no longer correct, as they must now include the number of weights of those newly added nodes. The same holds true for the number of nodes, which also needs to be updated. The number of nodes for a given node corresponds to the number of descendants of that node, including itself. In the implementation of the function that dynamically increases the size of the binary tree, this information was propagated upward through the tree starting from the parent node of the one of the two newly inserted nodes (the one that is set as parent of the leaf which was chosen randomly). The number of weights and nodes of the newly inserted nodes was added to the current node iteratively. Finally, the number of weights and nodes of the new parent node, which was not included in the loop, was also increased by the number of weights of its two children. This latest implementation was arrived at after several unsuccessful attempts. It involved the addition of a new link pointing from each node to its parent node, which was determined to be the most effective way for the propagation of both new weights and new nodes.
-\end{itemize}
+\paragraph{parameter tracking.}
+Another challenge was ensuring that each node always knew the number of weights it and its descendants had. This information is crucial for the functions within the nodes. When adding new nodes to a tree, the number of weights for all ancestor nodes of the newly added nodes is no longer correct, as they must now include the number of weights of those newly added nodes. The same holds true for the number of nodes, which also needs to be updated. The parameter about the number of nodes refers to the amount of descendants of the node containing this parameter, including itself. In the implementation of the function that dynamically increases the size of the binary tree, this information was propagated upward through the tree starting from the parent node of the one of the two newly inserted nodes (the one that is set as parent of the leaf which was chosen randomly). The number of weights and nodes of the newly inserted nodes was added to the current node iteratively. Finally, the number of weights and nodes of the new parent node, which was not included in the loop, was also increased by the number of weights of its two children. This latest implementation was arrived at after several unsuccessful attempts. It involved the addition of a new link pointing from each node to its parent node, which was determined to be the most effective way for the propagation of both new weights and new nodes.

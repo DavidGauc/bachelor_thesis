@@ -4,22 +4,22 @@
 \label{ch:conclusions}
 
 \section{Conclusion}
-In this work, we improved the binary tree model as an alternative to neural networks in solving reinforcement learning problems by adding a function that enables trees to grow dynamically depending on the complexity of the task to be solved. Following conclusions can be made:
+In this work, we improved the binary tree model as an alternative to neural networks in learning policies in reinforcement learning problems by adding a function that enables tree size to scale dynamically depending on the complexity of the task to be solved. Following conclusions can be made:
 
 \begin{itemize}
 
 \item The first goal of the project was to make the model work, which was successfully achieved as the project enabled testing the model on two different OpenAI Gym environments.
 
-\item Using CMA-ES instead of the previously used random weight guessing showed some interesting results, as it improved the model's ability to solve tasks. However, updating the covariance matrix of the optimizer each time the tree grows in size was a challenge, as the shape of the matrix would also need to be increased. To address this, we created a new covariance matrix whenever the tree size changes. A more accurate solution to this problem could further improve the model's efficiency in solving complex tasks.
+\item Using CMA-ES instead of random weight guessing showed some interesting results, as it improved the model's ability to solve tasks. However, updating the covariance matrix of the optimizer each time the tree grows in size was a challenge, as the shape of the matrix would also need to be increased. To address this, we created a new covariance matrix whenever the tree size changes. A more accurate solution to this problem could further improve the model's efficiency in solving complex tasks.
 
 \item The code of this project was refactored to enable easy introduction of new environments by creating a new configuration file, and to allow for rapid changes of each component of the model, as most functions perform a single task.
 
-\item The newly implemented function that enables the model to increase the size of the tree by randomly selecting the place to add new nodes was also successfully implemented. During experiments, the tree grew in size if it got stuck for a while without obtaining better scores, and the activations of the tree during the task were also printed. This information could be beneficial in implementing new strategies, as it shows which paths of the tree are more likely to be activated for a certain task.
+\item The newly implemented function that enables the model to increase the size of the tree by randomly selecting the place to add new nodes was also successfully implemented. During experiments, the tree grew in size if its score stagnated for a while without obtaining better scores, and the activations of the tree during the task were also printed. This information could be beneficial in implementing new strategies, as it shows which paths of the tree are more likely to be activated for a certain task.
 \end{itemize}
 
-The model, together with the node insertion strategy, was able to solve the \texttt{Lunar Lander} environment with discrete actions rapidly. However, for the \texttt{Bipedal Walker} environment, which has a continuous action space, it had more difficulties than expected, often getting stuck with relatively low scores. Despite this, the simplicity of the \texttt{add\_node} function makes it a comprehensive approach and a first step towards architecture search for binary trees.
+The model, together with the node insertion strategy, was able to solve the \texttt{Lunar Lander} environment with discrete actions rapidly. However, for the \texttt{Bipedal Walker} environment, which has a continuous action space, it had more difficulties, often getting stuck with relatively low scores. Despite this, the simplicity of the \texttt{add\_node} function makes it a comprehensive approach and a first step towards architecture search for binary trees.
 
-Overall, the binary tree model shows some interesting advantages in theory and is able to solve some relatively simple problems from OpenAI Gym with a simple implementation. However, with the current node insertion strategy and without fitness shaping, it was not yet capable of solving the \texttt{Bipedal Walker}environment of OpenAI Gym. Therefore, it would be interesting to continue working on binary trees and architecture search combined with it, to see how they perform in the future as an alternative to neural networks.
+Overall, the binary tree model shows some interesting advantages in theory and is able to solve some relatively simple problems from OpenAI Gym with a simple implementation. However, without fitness shaping, it was not yet capable of solving the \texttt{Bipedal Walker} environment of OpenAI Gym. Therefore, it would be interesting to continue working on binary trees and architecture search combined with it, to see how they perform in the future as an alternative to neural networks.
 
 
 
@@ -41,4 +41,4 @@ The continuation of this work includes multiple directions. Some ideas for futur
 
 \end{itemize}
 
-Finally, binary trees remain one possibility for an alternative to neural networks. However, seeking other models that address the current limitations of neural networks is still state-of-the-art and will likely be the focus of future research.
+Binary trees remain one candidate for an alternative to neural networks. Seeking other models that address the current limitations of neural networks is a promising focus for future research.
